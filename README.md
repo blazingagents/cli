@@ -1,7 +1,25 @@
-# `@blazingagents/cli`
+<div align="center">
+  <a href="https://docs.blazingagents.com">
+    <img src="https://raw.githubusercontent.com/blazingagents/docs/main/public/brand/icon.svg" alt="Blazing Agents logo" width="96">
+  </a>
+  <h1>Blazing Agents CLI</h1>
+  <p>Chat with, run, and manage Blazing Agents from your terminal.</p>
+  <p>
+    <a href="https://docs.blazingagents.com/cli">Documentation</a> ·
+    <a href="https://www.npmjs.com/package/@blazingagents/cli">npm</a>
+  </p>
+</div>
 
-The open-source command-line interface for Blazing Agents. It requires Node.js
-24 or newer. Linux systems also need the `libsecret-1-0` runtime package.
+The open-source command-line interface requires Node.js 24 or newer. Linux
+systems also need the `libsecret-1-0` runtime package.
+
+## Features
+
+- Chat with an Agent in an interactive terminal interface.
+- Run one-off prompts from a shell script or CI job.
+- Use Agent-assisted workflows from the command line.
+- Store sign-in credentials securely in the operating system keychain.
+- Target another Blazing Agents deployment with a flag or configuration file.
 
 ## Install
 
@@ -39,5 +57,7 @@ The default API is `https://api.blazingagents.com`. Override it with
 `--base-url`, `BLAZING_AGENTS_BASE_URL`, or a `baseUrl` entry in
 `${XDG_CONFIG_HOME:-~/.config}/blazing-agents/config.yaml`.
 
-See the [CLI documentation](https://docs.blazingagents.com/cli) for the full
-guide.
+## Documentation
+
+See the [CLI documentation](https://docs.blazingagents.com/cli) for setup,
+authentication, command guides, and CI usage.
