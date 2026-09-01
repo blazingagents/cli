@@ -1,0 +1,58 @@
+{
+  "name": "@blazingagents/cli",
+  "version": "0.1.0",
+  "description": "The Blazing Agents developer CLI",
+  "homepage": "https://docs.blazingagents.com/cli",
+  "bugs": {
+    "url": "https://github.com/blazingagents/cli/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blazingagents/cli.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "ba": "dist/bin/ba.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "check": "npm run typecheck && npm run test && npm run lint",
+    "fix": "ultracite fix",
+    "lint": "ultracite check",
+    "prepack": "npm run build",
+    "pretest": "npm run build",
+    "test": "vitest run --coverage && npm run test:packed",
+    "test:packed": "vitest run -c vitest.packed.config.mts",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.tests.json"
+  },
+  "dependencies": {
+    "@ai-sdk/tui": "1.0.85",
+    "@blazingagents/sdk": "0.2.1",
+    "@clack/prompts": "1.7.0",
+    "@github/keytar": "7.10.6",
+    "ai": "7.0.84",
+    "commander": "15.0.0",
+    "yaml": "2.9.0",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.8",
+    "@types/node": "26.4.0",
+    "@vitest/coverage-v8": "4.1.10",
+    "typescript": "7.0.2",
+    "ultracite": "7.10.2",
+    "vitest": "4.1.10"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

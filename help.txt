@@ -1,0 +1,53 @@
+$ ba --help
+Usage: ba [options] [command]
+
+The Blazing Agents developer CLI
+
+Options:
+  -V, --version           output the version number
+  --base-url <url>        override the Blazing Agents API base URL
+  --login                 log in using the native credential store
+  --logout                log out from the native credential store
+  --status                show authentication status
+  -h, --help              display help for command
+
+Commands:
+  assist [options]        administer Blazing Agents interactively
+  chat [options] <agent>  chat with an Agent interactively
+  run [options] <agent>   run one Agent turn
+
+$ ba assist --help
+Usage: ba assist [options]
+
+administer Blazing Agents interactively
+
+Options:
+  --session <id>  resume an existing Session
+  -h, --help      display help for command
+
+$ ba chat --help
+Usage: ba chat [options] <agent>
+
+chat with an Agent interactively
+
+Options:
+  --session <id>  resume an existing Session
+  -h, --help      display help for command
+
+$ ba run --help
+Usage: ba run [options] <agent>
+
+run one Agent turn
+
+Options:
+  --prompt <text>       use a literal prompt
+  --prompt-id <id>      invoke a stored Prompt
+  --var <key=value>     set a stored Prompt variable (default: {})
+  --session <id>        resume an existing Session
+  --user-id <value>     attribute the Turn to an end-user
+  --metadata <json>     attach JSON-object Attribution metadata
+  --json                buffer and emit one JSON document
+  --schema <file>       generate output matching a JSON Schema
+  --tool-output <mode>  set Tool diagnostics (choices: "summary", "off",
+                        default: "summary")
+  -h, --help            display help for command

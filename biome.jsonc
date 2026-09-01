@@ -1,0 +1,31 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": ["ultracite/biome/core", "ultracite/biome/type-aware"],
+  "assist": {
+    "actions": {
+      "source": {
+        "useSortedKeys": "off"
+      }
+    }
+  },
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUnresolvedImports": "off"
+      },
+      "performance": {
+        "noAwaitInLoops": "off"
+      },
+      "style": {
+        "useConsistentMethodSignatures": "off",
+        "useDefaultSwitchClause": "off",
+        "useDestructuring": "off"
+      },
+      "suspicious": {
+        "noEqualsToNull": "off",
+        "noThenProperty": "off",
+        "noUnnecessaryConditions": "off"
+      }
+    }
+  }
+}
