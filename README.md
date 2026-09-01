@@ -1,7 +1,7 @@
 # `@blazingagents/cli`
 
 The open-source command-line interface for Blazing Agents. It requires Node.js
-24 or newer.
+24 or newer. Linux systems also need the `libsecret-1-0` runtime package.
 
 ## Install
 
