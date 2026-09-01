@@ -23,7 +23,7 @@ jobs:
           node-version: "24"
           registry-url: https://registry.npmjs.org
           package-manager-cache: false
-      - run: sudo apt-get update && sudo apt-get install --yes libsecret-1-0
+      - run: sudo apt-get update && sudo apt-get install --yes expect libsecret-1-0
       - run: npm ci
       - run: npm run check
       - run: npm publish --provenance
