@@ -16,8 +16,12 @@ import {
 const repositoryRoot = fileURLToPath(new URL("..", import.meta.url));
 const MASK_GLYPHS = /[*•▪]/;
 
-test("the tarball contains only the compiled application and package documents", async () => {
-  expect(cliPack.files.map(({ path }) => path)).toEqual([
+test("the tarball contains the compiled application, documents and checked SDK", async () => {
+  expect(
+    cliPack.files
+      .map(({ path }) => path)
+      .filter((path) => !path.startsWith("node_modules/"))
+  ).toEqual([
     "LICENSE",
     "README.md",
     "dist/agent-resolution.js",
@@ -38,7 +42,13 @@ test("the tarball contains only the compiled application and package documents",
     "dist/tui.js",
     "dist/ui-message-stream.js",
     "package.json",
+    "vendor/blazingagents-sdk-0.2.1.tgz",
   ]);
+  expect(
+    cliPack.files.some(
+      ({ path }) => path === "node_modules/@blazingagents/sdk/dist/client.js"
+    )
+  ).toBe(true);
 
   const entrypoint = await readFile(
     join(
@@ -60,12 +70,12 @@ test("the clean consumer has exact lockstep package and runtime versions", async
   const manifests = await Promise.all(
     [
       ["cli", "@blazingagents", "cli"],
-      ["sdk", "@blazingagents", "sdk"],
+      ["sdk", "@blazingagents", "cli", "node_modules", "@blazingagents", "sdk"],
       ["tui", "@ai-sdk", "tui"],
       ["keytar", "@github", "keytar"],
       ["ai", "ai"],
       ["commander", "commander"],
-      ["yaml", "yaml"],
+      ["yaml", "@blazingagents", "cli", "node_modules", "yaml"],
     ].map(async ([label, ...segments]) => {
       const manifest = JSON.parse(
         await readFile(
@@ -109,7 +119,15 @@ test("the clean consumer has exact lockstep package and runtime versions", async
 
   const sdkManifest = JSON.parse(
     await readFile(
-      join(packageDirectory, "@blazingagents", "sdk", "package.json"),
+      join(
+        packageDirectory,
+        "@blazingagents",
+        "cli",
+        "node_modules",
+        "@blazingagents",
+        "sdk",
+        "package.json"
+      ),
       "utf8"
     )
   ) as Record<string, unknown>;
