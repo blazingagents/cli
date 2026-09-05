@@ -61,3 +61,13 @@ The default API is `https://api.blazingagents.com`. Override it with
 
 See the [CLI documentation](https://docs.blazingagents.com/cli) for setup,
 authentication, command guides, and CI usage.
+
+### Thinking level
+
+In `ba assist`, ask to create an Agent with a Thinking level, read its current
+level, set it to a value such as `high`, or clear it to Provider default.
+The hosted Agent Tool accepts `thinkingLevel` and preserves update approval.
+Known capabilities constrain choices; unknown capabilities accept custom
+strings that may still be rejected during execution. `ba chat` and `ba run`
+use the resolved Agent Version's selection without a per-Turn override.
+Configure the Admin Agent's own Thinking level in the dashboard or SDK.

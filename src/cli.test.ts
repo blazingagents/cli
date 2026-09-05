@@ -20,6 +20,7 @@ const runAgent = {
   model: "openrouter/test-model",
   name: "Release Agent",
   providerId: "prv_0123456789abcdef",
+  thinkingLevel: null,
   workspaceId: "ws_AAAAAAAAAAAAAAAA",
   status: "active",
   tenantId: "ten_AAAAAAAAAAAAAAAA",

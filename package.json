@@ -18,7 +18,8 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "vendor"
   ],
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
@@ -33,7 +34,7 @@
   },
   "dependencies": {
     "@ai-sdk/tui": "1.0.85",
-    "@blazingagents/sdk": "0.2.1",
+    "@blazingagents/sdk": "file:vendor/blazingagents-sdk-0.2.1.tgz",
     "@clack/prompts": "1.7.0",
     "@github/keytar": "7.10.6",
     "ai": "7.0.84",
@@ -49,6 +50,9 @@
     "ultracite": "7.10.2",
     "vitest": "4.1.10"
   },
+  "bundleDependencies": [
+    "@blazingagents/sdk"
+  ],
   "engines": {
     "node": ">=24"
   },
