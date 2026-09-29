@@ -25,6 +25,8 @@ function usage(turn: number): UsageSummary {
     durationMs: 1000,
     errorMessage: null,
     inputTokens: 8,
+    measurementComplete: true,
+    reasoningTokens: 0,
     modelDurationMs: 750,
     metadata: {},
     modelId: "openrouter/test-model",

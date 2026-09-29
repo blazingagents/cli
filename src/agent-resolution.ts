@@ -1,3 +1,4 @@
+import type { Agent, BlazingAgents } from "@blazingagents/sdk";
 import { agentIdSchema } from "@blazingagents/sdk/contracts";
 
 interface SelectableAgent {
@@ -7,6 +8,22 @@ interface SelectableAgent {
 
 export class AgentSelectionError extends Error {
   override name = "AgentSelectionError";
+}
+
+export async function listAgents(
+  client: BlazingAgents,
+  abortSignal?: AbortSignal
+): Promise<Agent[]> {
+  const agents: Agent[] = [];
+  let cursor: string | undefined;
+  do {
+    abortSignal?.throwIfAborted();
+    const page = await client.agents.list({ cursor, abortSignal });
+    abortSignal?.throwIfAborted();
+    agents.push(...page.data);
+    cursor = page.nextCursor ?? undefined;
+  } while (cursor !== undefined);
+  return agents;
 }
 
 export function resolveAgent<Agent extends SelectableAgent>(
@@ -21,9 +38,14 @@ export function resolveAgent<Agent extends SelectableAgent>(
     throw new AgentSelectionError(`No Agent found with id ${selector}.`);
   }
 
-  const exactNameMatch = agents.find((agent) => agent.name === selector);
-  if (exactNameMatch) {
-    return exactNameMatch;
+  const exactNameMatches = agents.filter((agent) => agent.name === selector);
+  if (exactNameMatches.length === 1) {
+    return exactNameMatches[0];
+  }
+  if (exactNameMatches.length > 1) {
+    throw new AgentSelectionError(
+      `Agent name "${selector}" is ambiguous. Use an Agent id.\n${exactNameMatches.map((agent) => `- ${agent.name} (${agent.id})`).join("\n")}`
+    );
   }
 
   const normalizedSelector = selector.toLowerCase();

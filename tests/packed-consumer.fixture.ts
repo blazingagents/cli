@@ -44,6 +44,10 @@ const promptId = "prompt_AAAAAAAAAAAAAAAA";
 
 const releaseAgent = {
   avatarUrl: null,
+  approvalInChat: { default: "full", overrides: [] },
+  approvalInTasks: { default: "full", overrides: [] },
+  autoCompaction: true,
+  compactionReserveTokens: 16_384,
   createdAt: "2026-07-16T10:00:00.000Z",
   id: "ag_AAAAAAAAAAAAAAAA",
   instructions: "",
@@ -78,6 +82,8 @@ function chatUsage(): UsageSummary {
     durationMs: 1000,
     errorMessage: null,
     inputTokens: 12,
+    measurementComplete: true,
+    reasoningTokens: 0,
     modelDurationMs: 750,
     metadata: {},
     modelId: releaseAgent.model,
@@ -86,7 +92,9 @@ function chatUsage(): UsageSummary {
     sessionId,
     startedAt: "2026-07-16T10:00:00.000Z",
     status: "succeeded",
-    stepUsages: [{ inputTokens: 12, outputTokens: 4, stepNumber: 0 }],
+    stepUsages: [
+      { inputTokens: 12, outputTokens: 4, reasoningTokens: 0, stepNumber: 0 },
+    ],
     tenantId: releaseAgent.tenantId,
     userId: "",
   };
@@ -564,35 +572,50 @@ beforeAll(async () => {
         return;
       }
       response.setHeader("content-type", "application/json");
-      response.end(JSON.stringify({ name: "Packed Tenant", quota: null }));
+      response.end(
+        JSON.stringify({
+          name: "Packed Tenant",
+          quota: null,
+          deletion: null,
+          monetizationEnabled: false,
+        })
+      );
       return;
     }
     if (apiPath === "/v1/agents") {
       response.setHeader("content-type", "application/json");
       if (scenario === "assist-zero") {
-        response.end(JSON.stringify({ agents: [releaseAgent] }));
+        response.end(
+          JSON.stringify({ data: [releaseAgent], nextCursor: null })
+        );
       } else if (scenario === "assist-multiple") {
         response.end(
-          JSON.stringify({ agents: [adminAgent, { ...adminAgent }] })
+          JSON.stringify({
+            data: [adminAgent, { ...adminAgent }],
+            nextCursor: null,
+          })
         );
       } else if (scenario.startsWith("assist-")) {
-        response.end(JSON.stringify({ agents: [releaseAgent, adminAgent] }));
+        response.end(
+          JSON.stringify({ data: [releaseAgent, adminAgent], nextCursor: null })
+        );
       } else if (scenario === "admin") {
         response.end(
           JSON.stringify({
-            agents: [
+            data: [
               {
                 ...releaseAgent,
                 id: "ag_admAAAAAAAAAAAAA",
                 name: "Admin Agent",
               },
             ],
+            nextCursor: null,
           })
         );
       } else if (scenario === "ambiguous") {
         response.end(
           JSON.stringify({
-            agents: [
+            data: [
               releaseAgent,
               {
                 ...releaseAgent,
@@ -600,10 +623,13 @@ beforeAll(async () => {
                 name: "release agent",
               },
             ],
+            nextCursor: null,
           })
         );
       } else {
-        response.end(JSON.stringify({ agents: [releaseAgent] }));
+        response.end(
+          JSON.stringify({ data: [releaseAgent], nextCursor: null })
+        );
       }
       return;
     }
@@ -613,6 +639,7 @@ beforeAll(async () => {
         JSON.stringify({
           createdAt: "2026-07-16T10:00:00.000Z",
           id: promptId,
+          agentId: null,
           metadata: {},
           name: "Release",
           template: "Release {{version}} to {{environment}}",

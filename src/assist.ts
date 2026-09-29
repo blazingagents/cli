@@ -3,6 +3,7 @@ import {
   type BlazingAgentsOptions,
   type BlazingAgentsUIMessageChunk,
 } from "@blazingagents/sdk";
+import { listAgents } from "./agent-resolution.ts";
 import { BlazingChatTransport } from "./chat-transport.ts";
 import type { ResolvedConfiguration } from "./config.ts";
 import { isAdminAgentId } from "./contracts.ts";
@@ -96,15 +97,21 @@ async function recoverSession({
   const removeSignal = onSignal?.("SIGINT", () => recoveryAbort.abort());
   let verifiedSession = false;
   try {
-    await client.sessions.messages(adminAgentId, sessionId, { limit: 1 });
+    await client.sessions.messages({
+      agentId: adminAgentId,
+      sessionId,
+      limit: 1,
+      abortSignal: recoveryAbort.signal,
+    });
     verifiedSession = true;
     if (recoveryAbort.signal.aborted) {
       throw new ApprovalInputInterruptedError("Recovery interrupted");
     }
-    let approvals = await client.sessions.toolApprovals(
-      adminAgentId,
-      sessionId
-    );
+    let approvals = await client.sessions.toolApprovals({
+      agentId: adminAgentId,
+      sessionId,
+      abortSignal: recoveryAbort.signal,
+    });
     let continuationId = approvals.continuation?.id;
     for (const approval of approvals.data) {
       if (approval.decision !== "pending") {
@@ -124,15 +131,19 @@ async function recoverSession({
       });
       continuationId = decision.continuationId;
     }
-    approvals = await client.sessions.toolApprovals(adminAgentId, sessionId);
+    approvals = await client.sessions.toolApprovals({
+      agentId: adminAgentId,
+      sessionId,
+      abortSignal: recoveryAbort.signal,
+    });
     continuationId ??= approvals.continuation?.id;
     if (continuationId) {
-      const continuation = await client.sessions.joinToolApprovalContinuation(
-        adminAgentId,
+      const continuation = await client.sessions.joinToolApprovalContinuation({
+        agentId: adminAgentId,
         sessionId,
         continuationId,
-        { signal: recoveryAbort.signal }
-      );
+        abortSignal: recoveryAbort.signal,
+      });
       await renderRecoveryStream(
         decodeUIMessageResponse(continuation.toResponse()),
         stdout,
@@ -189,7 +200,7 @@ export async function executeAssist({
     baseUrl: configuration.baseUrl,
     ...(fetch ? { fetch } : {}),
   });
-  const { agents } = await client.agents.list();
+  const agents = await listAgents(client);
   const adminAgents = agents.filter(({ id }) => isAdminAgentId(id));
   if (adminAgents.length !== 1) {
     throw new AssistOperationalError(

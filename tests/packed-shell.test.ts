@@ -42,7 +42,7 @@ test("the tarball contains the compiled application, documents and checked SDK",
     "dist/tui.js",
     "dist/ui-message-stream.js",
     "package.json",
-    "vendor/blazingagents-sdk-0.2.1.tgz",
+    "vendor/blazingagents-sdk-0.15.0.tgz",
   ]);
   expect(
     cliPack.files.some(
@@ -101,7 +101,7 @@ test("the clean consumer has exact lockstep package and runtime versions", async
     cli: "0.1.0",
     commander: "15.0.0",
     keytar: "7.10.6",
-    sdk: "0.2.1",
+    sdk: "0.15.0",
     tui: "1.0.85",
     yaml: "2.9.0",
     zod: "4.5.4",

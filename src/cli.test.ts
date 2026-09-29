@@ -11,6 +11,10 @@ import { createCredentialStoreFixture } from "./test/credential-store-fixture.ts
 
 const runAgent = {
   avatarUrl: null,
+  approvalInChat: { default: "full", overrides: [] },
+  approvalInTasks: { default: "full", overrides: [] },
+  autoCompaction: true,
+  compactionReserveTokens: 16_384,
   createdAt: "2026-07-16T10:00:00.000Z",
   id: "ag_AAAAAAAAAAAAAAAA",
   instructions: "",
@@ -33,13 +37,14 @@ const runAgent = {
 function runFetch(agents = [runAgent]) {
   return (input: string) => {
     if (input.endsWith("/v1/agents")) {
-      return Promise.resolve(Response.json({ agents }));
+      return Promise.resolve(Response.json({ data: agents, nextCursor: null }));
     }
     if (input.includes("/v1/prompts/")) {
       return Promise.resolve(
         Response.json({
           createdAt: "2026-07-16T10:00:00.000Z",
           id: "prompt_AAAAAAAAAAAAAAAA",
+          agentId: null,
           metadata: {},
           name: "Release",
           template: "Release {{version}}",
@@ -400,7 +405,9 @@ test("assist accepts and verifies a valid explicit Session id", async () => {
     environment: { BLAZING_AGENTS_API_KEY: `ba_${"e".repeat(40)}` },
     fetch: (url) => {
       if (url.endsWith("/v1/agents")) {
-        return Promise.resolve(Response.json({ agents: [adminAgent] }));
+        return Promise.resolve(
+          Response.json({ data: [adminAgent], nextCursor: null })
+        );
       }
       if (url.includes("/messages?limit=1")) {
         return Promise.resolve(
@@ -429,7 +436,7 @@ test("chat accepts a valid explicit Session id and prints its resume receipt", a
       fetch: (url) =>
         Promise.resolve(
           url.endsWith("/v1/agents")
-            ? Response.json({ agents: [runAgent] })
+            ? Response.json({ data: [runAgent], nextCursor: null })
             : Response.json({
                 data: [],
                 latestCursor: null,
@@ -764,6 +771,8 @@ test("status validates an environment override without loading or persisting nat
           {
             name: "Tenant",
             quota: null,
+            deletion: null,
+            monetizationEnabled: false,
           },
           { status: 200 }
         )

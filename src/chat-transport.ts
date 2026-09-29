@@ -91,12 +91,12 @@ export class BlazingChatTransport implements ChatTransport<UIMessage> {
         continuationId = decision.continuationId;
       }
       const continuation =
-        await this.#client.sessions.joinToolApprovalContinuation(
-          this.#agentId,
-          this.#sessionId,
+        await this.#client.sessions.joinToolApprovalContinuation({
+          agentId: this.#agentId,
+          sessionId: this.#sessionId,
           continuationId,
-          abortSignal ? { signal: abortSignal } : undefined
-        );
+          abortSignal,
+        });
       return this.#projectStream(
         decodeUIMessageResponse(continuation.toResponse())
       );
@@ -110,7 +110,7 @@ export class BlazingChatTransport implements ChatTransport<UIMessage> {
       agentId: this.#agentId,
       message,
       messageId,
-      signal: abortSignal,
+      abortSignal,
     };
     let result: ChatResult;
     if (this.#sessionId === undefined) {

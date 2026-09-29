@@ -50,6 +50,10 @@ function formatErrorMetadataValue(value: string): string {
 }
 
 function formatBlazingAgentsError(error: BlazingAgentsError): string {
+  const prefix = `[${error.code}] `;
+  const message = error.message.startsWith(prefix)
+    ? error.message.slice(prefix.length)
+    : error.message;
   const metadata = [
     `code=${formatErrorMetadataValue(error.code)}`,
     ...(error.status === undefined ? [] : [`status=${error.status}`]),
@@ -63,7 +67,7 @@ function formatBlazingAgentsError(error: BlazingAgentsError): string {
       ? []
       : [`details=${safePreview(error.details)}`]),
   ];
-  return `${error.message.replaceAll(/\s+/g, " ")} [${metadata.join(" ")}]\n`;
+  return `${formatErrorMetadataValue(message)} [${metadata.join(" ")}]\n`;
 }
 
 function parseSessionId(value: string): string {

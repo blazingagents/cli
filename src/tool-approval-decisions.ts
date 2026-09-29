@@ -16,18 +16,22 @@ export async function submitToolApprovalDecision({
   signal?: AbortSignal;
 }) {
   try {
-    return await client.sessions.decideToolApproval(
+    return await client.sessions.decideToolApproval({
       agentId,
       sessionId,
       approvalId,
-      { approved },
-      signal ? { signal } : undefined
-    );
+      approved,
+      abortSignal: signal,
+    });
   } catch (error) {
     if (!(BlazingAgentsError.isInstance(error) && error.status === 409)) {
       throw error;
     }
-    const trusted = await client.sessions.toolApprovals(agentId, sessionId);
+    const trusted = await client.sessions.toolApprovals({
+      agentId,
+      sessionId,
+      abortSignal: signal,
+    });
     const stored = trusted.data.find(
       (approval) => approval.approvalId === approvalId
     );
