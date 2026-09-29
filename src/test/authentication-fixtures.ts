@@ -16,7 +16,12 @@ export function credentialRecord(
 
 export function tenantResponse(status = 200): Response {
   return status === 200
-    ? Response.json({ name: "Tenant", quota: null })
+    ? Response.json({
+        name: "Tenant",
+        quota: null,
+        deletion: null,
+        monetizationEnabled: false,
+      })
     : Response.json(
         { error: { code: "unauthorized", message: "Unauthorized" } },
         { status }

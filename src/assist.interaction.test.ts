@@ -26,7 +26,9 @@ test("an explicit Admin Session recovers pending approvals before a clean TUI", 
       url,
     });
     if (url.endsWith("/v1/agents")) {
-      return Promise.resolve(Response.json({ agents: [adminAgent] }));
+      return Promise.resolve(
+        Response.json({ data: [adminAgent], nextCursor: null })
+      );
     }
     if (url.endsWith(`/sessions/${sessionId}/messages?limit=1`)) {
       return Promise.resolve(
@@ -156,7 +158,9 @@ test("a new Assist interaction creates its Session only on the first submitted p
   const fetch: NonNullable<BlazingAgentsOptions["fetch"]> = (url, init) => {
     requests.push({ method: init?.method ?? "GET", url });
     if (url.endsWith("/v1/agents")) {
-      return Promise.resolve(Response.json({ agents: [adminAgent] }));
+      return Promise.resolve(
+        Response.json({ data: [adminAgent], nextCursor: null })
+      );
     }
     if (url.endsWith(`/v1/agents/${adminAgentId}/sessions`)) {
       return Promise.resolve(
@@ -271,7 +275,8 @@ test.each([
           baseUrl: "https://api.example.com",
           source: "flag",
         },
-        fetch: () => Promise.resolve(Response.json({ agents })),
+        fetch: () =>
+          Promise.resolve(Response.json({ data: agents, nextCursor: null })),
         loadTui: () => {
           tuiLoads += 1;
           return Promise.resolve({ runAgentTUI: () => Promise.resolve() });
@@ -296,7 +301,8 @@ test("an unconfigured Admin Agent directs the Tenant to configure a Provider and
       fetch: () =>
         Promise.resolve(
           Response.json({
-            agents: [{ ...adminAgent, model: null, providerId: null }],
+            data: [{ ...adminAgent, model: null, providerId: null }],
+            nextCursor: null,
           })
         ),
       loadTui: () => {
@@ -326,7 +332,10 @@ test.each([false, true])(
           baseUrl: "https://api.example.com",
           source: "flag",
         },
-        fetch: () => Promise.resolve(Response.json({ agents: [adminAgent] })),
+        fetch: () =>
+          Promise.resolve(
+            Response.json({ data: [adminAgent], nextCursor: null })
+          ),
         loadTui: () =>
           Promise.resolve({ runAgentTUI: () => Promise.reject(failure) }),
         stdout: (text) => {
@@ -350,7 +359,9 @@ test("a TUI failure still prints an existing Session receipt", async () => {
       configuration: { baseUrl: "https://api.example.com", source: "flag" },
       fetch: (url) => {
         if (url.endsWith("/v1/agents")) {
-          return Promise.resolve(Response.json({ agents: [adminAgent] }));
+          return Promise.resolve(
+            Response.json({ data: [adminAgent], nextCursor: null })
+          );
         }
         if (url.endsWith("/messages?limit=1")) {
           return Promise.resolve(
@@ -378,7 +389,10 @@ test("the default lazy loader imports the published upstream TUI", async () => {
     executeAssist({
       apiKey: "ba_test",
       configuration: { baseUrl: "https://api.example.com", source: "flag" },
-      fetch: () => Promise.resolve(Response.json({ agents: [adminAgent] })),
+      fetch: () =>
+        Promise.resolve(
+          Response.json({ data: [adminAgent], nextCursor: null })
+        ),
       stdout: () => undefined,
     })
   ).resolves.toBeUndefined();

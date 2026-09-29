@@ -5,7 +5,7 @@ import {
   type BlazingAgentsOptions,
 } from "@blazingagents/sdk";
 import { z } from "zod";
-import { resolveAgent } from "./agent-resolution.ts";
+import { listAgents, resolveAgent } from "./agent-resolution.ts";
 import type { ResolvedConfiguration } from "./config.ts";
 import { isAdminAgentId } from "./contracts.ts";
 import {
@@ -46,7 +46,7 @@ async function executeSchemaMode(
     metadata: options.metadata,
     ...promptInput,
     schema,
-    signal: abortSignal,
+    abortSignal,
     userId: options.userId,
   });
   const output = await result.object;
@@ -64,12 +64,17 @@ async function executeSessionMode(
   options: RunCommandOptions & Extract<RunExecutionMode, { mode: "session" }>
 ): Promise<string> {
   const { sessionId } = options;
-  await client.sessions.messages(agent.id, sessionId, { limit: 1 });
+  await client.sessions.messages({
+    agentId: agent.id,
+    sessionId,
+    limit: 1,
+    abortSignal,
+  });
   const commonInput = {
     agentId: agent.id,
     metadata: options.metadata,
     sessionId,
-    signal: abortSignal,
+    abortSignal,
     userId: options.userId,
   };
   const result = await client.chat(
@@ -107,7 +112,7 @@ async function executeStatelessMode(
     agentId: agent.id,
     metadata: options.metadata,
     ...promptInput,
-    signal: abortSignal,
+    abortSignal,
     userId: options.userId,
   });
   let output = "";
@@ -159,7 +164,7 @@ export async function executeRun({
       baseUrl: configuration.baseUrl,
       ...(fetch ? { fetch } : {}),
     });
-    const { agents } = await client.agents.list();
+    const agents = await listAgents(client, abortController.signal);
     const agent = resolveAgent(agentSelector, agents);
     if (isAdminAgentId(agent.id)) {
       throw new RunOperationalError(
@@ -167,7 +172,10 @@ export async function executeRun({
       );
     }
     if (options.kind === "stored") {
-      const prompt = await client.prompts.get(options.promptId);
+      const prompt = await client.prompts.get({
+        promptId: options.promptId,
+        abortSignal: abortController.signal,
+      });
       validatePromptVariables(prompt.variables, options.variables);
     }
     if (signalExitCode) {

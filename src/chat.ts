@@ -1,5 +1,5 @@
 import { BlazingAgents, type BlazingAgentsOptions } from "@blazingagents/sdk";
-import { resolveAgent } from "./agent-resolution.ts";
+import { listAgents, resolveAgent } from "./agent-resolution.ts";
 import { BlazingChatTransport } from "./chat-transport.ts";
 import type { ResolvedConfiguration } from "./config.ts";
 import { isAdminAgentId } from "./contracts.ts";
@@ -37,7 +37,7 @@ export async function executeChat({
     baseUrl: configuration.baseUrl,
     ...(fetch ? { fetch } : {}),
   });
-  const { agents } = await client.agents.list();
+  const agents = await listAgents(client);
   const agent = resolveAgent(agentSelector, agents);
   if (isAdminAgentId(agent.id)) {
     throw new ChatOperationalError(
@@ -45,7 +45,7 @@ export async function executeChat({
     );
   }
   if (sessionId) {
-    await client.sessions.messages(agent.id, sessionId, { limit: 1 });
+    await client.sessions.messages({ agentId: agent.id, sessionId, limit: 1 });
   }
 
   const transport = new BlazingChatTransport({

@@ -20,7 +20,9 @@ test("Ctrl+C before a recovery decision leaves the approval pending and prints a
     fetch: (url, init) => {
       requests.push({ method: init?.method ?? "GET", url });
       if (url.endsWith("/v1/agents")) {
-        return Promise.resolve(Response.json({ agents: [adminAgent] }));
+        return Promise.resolve(
+          Response.json({ data: [adminAgent], nextCursor: null })
+        );
       }
       if (url.endsWith("/messages?limit=1")) {
         return Promise.resolve(
@@ -71,7 +73,9 @@ test("Ctrl+C after continuation admission detaches without starting the TUI", as
   let stdout = "";
   const fetch: NonNullable<BlazingAgentsOptions["fetch"]> = (url, init) => {
     if (url.endsWith("/v1/agents")) {
-      return Promise.resolve(Response.json({ agents: [adminAgent] }));
+      return Promise.resolve(
+        Response.json({ data: [adminAgent], nextCursor: null })
+      );
     }
     if (url.endsWith("/messages?limit=1")) {
       return Promise.resolve(
@@ -149,7 +153,9 @@ test("recovery renders Tool outcomes and text before the clean TUI", async () =>
   let tuiLoads = 0;
   const fetch: NonNullable<BlazingAgentsOptions["fetch"]> = (url) => {
     if (url.endsWith("/v1/agents")) {
-      return Promise.resolve(Response.json({ agents: [adminAgent] }));
+      return Promise.resolve(
+        Response.json({ data: [adminAgent], nextCursor: null })
+      );
     }
     if (url.endsWith("/messages?limit=1")) {
       return Promise.resolve(
@@ -234,7 +240,9 @@ test("a recovery stream error is safe, actionable, and prevents the TUI", async 
       configuration: { baseUrl: "https://api.example.com", source: "flag" },
       fetch: (url) => {
         if (url.endsWith("/v1/agents")) {
-          return Promise.resolve(Response.json({ agents: [adminAgent] }));
+          return Promise.resolve(
+            Response.json({ data: [adminAgent], nextCursor: null })
+          );
         }
         if (url.endsWith("/messages?limit=1")) {
           return Promise.resolve(
@@ -274,7 +282,9 @@ test("Ctrl+C cannot turn an unverified Session failure into a receipt", async ()
       configuration: { baseUrl: "https://api.example.com", source: "flag" },
       fetch: (url) => {
         if (url.endsWith("/v1/agents")) {
-          return Promise.resolve(Response.json({ agents: [adminAgent] }));
+          return Promise.resolve(
+            Response.json({ data: [adminAgent], nextCursor: null })
+          );
         }
         interrupt();
         return Promise.resolve(
@@ -307,7 +317,9 @@ test("Ctrl+C after verification stops before a recovery prompt", async () => {
     configuration: { baseUrl: "https://api.example.com", source: "flag" },
     fetch: (url) => {
       if (url.endsWith("/v1/agents")) {
-        return Promise.resolve(Response.json({ agents: [adminAgent] }));
+        return Promise.resolve(
+          Response.json({ data: [adminAgent], nextCursor: null })
+        );
       }
       if (url.endsWith("/messages?limit=1")) {
         return Promise.resolve(
@@ -354,7 +366,9 @@ test("Ctrl+C while verification settles stops before approval state is read", as
     fetch: (url) => {
       urls.push(url);
       if (url.endsWith("/v1/agents")) {
-        return Promise.resolve(Response.json({ agents: [adminAgent] }));
+        return Promise.resolve(
+          Response.json({ data: [adminAgent], nextCursor: null })
+        );
       }
       interrupt();
       return Promise.resolve(
@@ -383,7 +397,9 @@ test("a settled explicit Session with no continuation starts a clean TUI", async
     fetch: (url) => {
       urls.push(url);
       if (url.endsWith("/v1/agents")) {
-        return Promise.resolve(Response.json({ agents: [adminAgent] }));
+        return Promise.resolve(
+          Response.json({ data: [adminAgent], nextCursor: null })
+        );
       }
       if (url.endsWith("/messages?limit=1")) {
         return Promise.resolve(

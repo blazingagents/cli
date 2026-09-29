@@ -17,7 +17,9 @@ test("product commands continue using the stored credential", async () => {
     credentialRecord()
   );
   const originalFetch = globalThis.fetch;
-  vi.stubGlobal("fetch", async () => Response.json({ agents: [] }));
+  vi.stubGlobal("fetch", async () =>
+    Response.json({ data: [], nextCursor: null })
+  );
   const assist = await captureAuthentication(["assist"], {
     loadCredentialStore: assistStore.loader,
     loadTui: () => Promise.resolve({ runAgentTUI: async () => undefined }),
@@ -35,7 +37,7 @@ test("product commands continue using the stored credential", async () => {
       fetch: (input) =>
         Promise.resolve(
           input.toString().endsWith("/v1/agents")
-            ? Response.json({ agents: [] })
+            ? Response.json({ data: [], nextCursor: null })
             : new Response("generated")
         ),
       loadCredentialStore: runStore.loader,

@@ -82,13 +82,16 @@ test("a conflicting trusted decision remains a conflict after reread", async () 
 
 test("a stale denial rejoins the trusted matching continuation", async () => {
   let request = 0;
+  const controller = new AbortController();
+  const signals: (AbortSignal | null | undefined)[] = [];
   await expect(
     submitToolApprovalDecision({
       agentId,
       approvalId: "approval-denied",
       approved: false,
-      client: client(() => {
+      client: client((_url, init) => {
         request += 1;
+        signals.push(init?.signal);
         return Promise.resolve(
           request === 1
             ? Response.json(
@@ -119,9 +122,11 @@ test("a stale denial rejoins the trusted matching continuation", async () => {
         );
       }),
       sessionId,
+      signal: controller.signal,
     })
   ).resolves.toEqual({
     continuationId: "continuation-denied",
     state: "succeeded",
   });
+  expect(signals).toEqual([controller.signal, controller.signal]);
 });

@@ -248,7 +248,12 @@ test("packed auth validates status, isolates origins, and logs out locally", asy
   const fetchTenant = () => {
     networkCalls += 1;
     return Promise.resolve(
-      Response.json({ name: "Packed Tenant", quota: null })
+      Response.json({
+        name: "Packed Tenant",
+        quota: null,
+        deletion: null,
+        monetizationEnabled: false,
+      })
     );
   };
 
@@ -295,7 +300,14 @@ test("packed auth reports a dashboard key still active when native storage fails
     ["--base-url", "https://packed-storage.example", "--login"],
     {
       fetch: () =>
-        Promise.resolve(Response.json({ name: "Packed Tenant", quota: null })),
+        Promise.resolve(
+          Response.json({
+            name: "Packed Tenant",
+            quota: null,
+            deletion: null,
+            monetizationEnabled: false,
+          })
+        ),
       loadCredentialStore: store.loader,
       readSecret: () => Promise.resolve(STORAGE_FAILURE_KEY),
     }

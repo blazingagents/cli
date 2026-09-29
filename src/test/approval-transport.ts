@@ -9,6 +9,10 @@ export const sessionId = "ss_AAAAAAAAAAAAAAAA";
 
 export const adminAgent = {
   avatarUrl: null,
+  approvalInChat: { default: "full", overrides: [] },
+  approvalInTasks: { default: "full", overrides: [] },
+  autoCompaction: true,
+  compactionReserveTokens: 16_384,
   createdAt: "2026-07-16T10:00:00.000Z",
   id: adminAgentId,
   instructions: "",

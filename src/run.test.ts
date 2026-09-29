@@ -9,6 +9,10 @@ const promptId = "prompt_AAAAAAAAAAAAAAAA";
 const sessionId = "ss_AAAAAAAAAAAAAAAA";
 const agent = {
   avatarUrl: null,
+  approvalInChat: { default: "full", overrides: [] },
+  approvalInTasks: { default: "full", overrides: [] },
+  autoCompaction: true,
+  compactionReserveTokens: 16_384,
   createdAt: "2026-07-16T10:00:00.000Z",
   id: agentId,
   instructions: "",
@@ -65,12 +69,13 @@ function createFetch({
       url,
     });
     if (url.endsWith("/v1/agents")) {
-      return json({ agents: [agent] });
+      return json({ data: [agent], nextCursor: null });
     }
     if (url.endsWith(`/v1/prompts/${promptId}`)) {
       return json({
         createdAt: "2026-07-16T10:00:00.000Z",
         id: promptId,
+        agentId: null,
         metadata: {},
         name: "Release",
         template: "Release {{version}}",
@@ -285,7 +290,8 @@ test("Admin Agent selection is an operational failure", async () => {
   const fetch: NonNullable<BlazingAgentsOptions["fetch"]> = () =>
     Promise.resolve(
       json({
-        agents: [{ ...agent, id: "ag_admAAAAAAAAAAAAA", name: "Admin Agent" }],
+        data: [{ ...agent, id: "ag_admAAAAAAAAAAAAA", name: "Admin Agent" }],
+        nextCursor: null,
       })
     );
   await expect(
@@ -312,7 +318,7 @@ test.each([
     // biome-ignore lint/suspicious/useAwait: synchronous boundary fixture implements the SDK fetch contract
     const fetch: NonNullable<BlazingAgentsOptions["fetch"]> = async (url) => {
       if (url.endsWith("/v1/agents")) {
-        return json({ agents: [agent] });
+        return json({ data: [agent], nextCursor: null });
       }
       listeners.get(signal)?.();
       throw new Error("aborted transport");
@@ -376,6 +382,52 @@ test("a signal observed after Prompt validation exits before a Turn", async () =
   expect(fixture.calls.some(({ url }) => url.endsWith("/generation"))).toBe(
     false
   );
+});
+
+test("Ctrl+C during the first Agent page stops pagination before Prompt or model requests", async () => {
+  const listeners = new Map<RunSignal, () => void>();
+  const calls: string[] = [];
+  let requestSignal: AbortSignal | undefined;
+  // biome-ignore lint/suspicious/useAwait: synchronous boundary fixture implements the SDK fetch contract
+  const fetch: NonNullable<BlazingAgentsOptions["fetch"]> = async (
+    url,
+    init
+  ) => {
+    calls.push(url);
+    requestSignal = init?.signal ?? undefined;
+    if (url.endsWith("/v1/agents")) {
+      listeners.get("SIGINT")?.();
+      return json({ data: [agent], nextCursor: "second-page" });
+    }
+    throw new Error(`Unexpected request: ${url}`);
+  };
+
+  await expect(
+    executeRun({
+      agentSelector: "Release Agent",
+      apiKey: "ba_test",
+      configuration: { baseUrl: "https://api.example.com", source: "flag" },
+      fetch,
+      onSignal: (signal, listener) => {
+        listeners.set(signal, listener);
+        return () => undefined;
+      },
+      options: {
+        json: false,
+        kind: "stored",
+        metadata: {},
+        mode: "stateless",
+        promptId,
+        toolOutput: "summary",
+        userId: "",
+        variables: { version: "1" },
+      },
+      stderr: () => undefined,
+      stdout: () => undefined,
+    })
+  ).resolves.toBe(130);
+  expect(requestSignal?.aborted).toBe(true);
+  expect(calls).toEqual(["https://api.example.com/v1/agents"]);
 });
 
 test("a signal observed while a successful body settles suppresses buffered output", async () => {

@@ -5,6 +5,10 @@ import { executeChat } from "./chat.ts";
 const agentId = "ag_AAAAAAAAAAAAAAAA";
 const agent = {
   avatarUrl: null,
+  approvalInChat: { default: "full", overrides: [] },
+  approvalInTasks: { default: "full", overrides: [] },
+  autoCompaction: true,
+  compactionReserveTokens: 16_384,
   createdAt: "2026-07-16T10:00:00.000Z",
   id: agentId,
   instructions: "",
@@ -33,7 +37,7 @@ test("opening and exiting a new chat creates no Session and prints no receipt", 
   // biome-ignore lint/suspicious/useAwait: synchronous fixture implements the SDK fetch contract
   const fetch: NonNullable<BlazingAgentsOptions["fetch"]> = async (url) => {
     urls.push(url);
-    return Response.json({ agents: [agent] });
+    return Response.json({ data: [agent], nextCursor: null });
   };
   const runAgentTUI = vi.fn().mockResolvedValue(undefined);
   let stdout = "";
@@ -65,7 +69,7 @@ test("an explicit Session is verified before the TUI and prints an exact receipt
   const fetch: NonNullable<BlazingAgentsOptions["fetch"]> = async (url) => {
     urls.push(url);
     if (url.endsWith("/v1/agents")) {
-      return Response.json({ agents: [agent] });
+      return Response.json({ data: [agent], nextCursor: null });
     }
     return Response.json({ data: [], latestCursor: null, nextCursor: null });
   };
@@ -102,7 +106,7 @@ test("a missing or foreign Session fails before the TUI without fallback", async
   const fetch: NonNullable<BlazingAgentsOptions["fetch"]> = async (url) => {
     urls.push(url);
     if (url.endsWith("/v1/agents")) {
-      return Response.json({ agents: [agent] });
+      return Response.json({ data: [agent], nextCursor: null });
     }
     return Response.json(
       { error: { code: "not_found", message: "Session not found" } },
@@ -141,9 +145,10 @@ test("the Admin Agent is rejected before the TUI with BA Assist guidance", async
       fetch: () =>
         Promise.resolve(
           Response.json({
-            agents: [
+            data: [
               { ...agent, id: "ag_admAAAAAAAAAAAAA", name: "Admin Agent" },
             ],
+            nextCursor: null,
           })
         ),
       loadTui: () => {
@@ -162,7 +167,8 @@ test("the default lazy loader imports the published upstream TUI", async () => {
       agentSelector: "Release Agent",
       apiKey: "ba_test",
       configuration: { baseUrl: "https://api.example.com", source: "flag" },
-      fetch: () => Promise.resolve(Response.json({ agents: [agent] })),
+      fetch: () =>
+        Promise.resolve(Response.json({ data: [agent], nextCursor: null })),
       stdout: () => undefined,
     })
   ).resolves.toBeUndefined();
@@ -188,7 +194,8 @@ test.each([false, true])(
           baseUrl: "https://api.example.com",
           source: "flag",
         },
-        fetch: () => Promise.resolve(Response.json({ agents: [agent] })),
+        fetch: () =>
+          Promise.resolve(Response.json({ data: [agent], nextCursor: null })),
         loadTui: () =>
           Promise.resolve({
             runAgentTUI: () => Promise.reject(failure),
