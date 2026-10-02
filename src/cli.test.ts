@@ -31,7 +31,6 @@ const runAgent = {
   tools: [],
   updatedAt: "2026-07-16T10:00:00.000Z",
   userId: "",
-  version: 1,
 };
 
 function runFetch(agents = [runAgent]) {

@@ -12,7 +12,7 @@ test("the CLI bundles the checked SDK with exact runtime pins", async () => {
     bin: { ba: "dist/bin/ba.js" },
     dependencies: {
       "@ai-sdk/tui": "1.0.85",
-      "@blazingagents/sdk": "file:vendor/blazingagents-sdk-0.15.0.tgz",
+      "@blazingagents/sdk": "file:vendor/blazingagents-sdk-0.17.0.tgz",
       "@clack/prompts": "1.7.0",
       "@github/keytar": "7.10.6",
       ai: "7.0.84",
@@ -36,5 +36,5 @@ test("the CLI depends only on public runtime packages", async () => {
   expect(cli.dependencies).not.toHaveProperty("@blazing-agents/core");
   expect(
     (cli.dependencies as Record<string, unknown>)["@blazingagents/sdk"]
-  ).toBe("file:vendor/blazingagents-sdk-0.15.0.tgz");
+  ).toBe("file:vendor/blazingagents-sdk-0.17.0.tgz");
 });

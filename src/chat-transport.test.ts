@@ -19,7 +19,6 @@ const agentId = "ag_AAAAAAAAAAAAAAAA";
 function usage(turn: number): UsageSummary {
   return {
     agentId,
-    agentVersion: 1,
     commitId: `commit-${turn}`,
     completedAt: "2026-07-16T10:00:01.000Z",
     durationMs: 1000,

@@ -64,7 +64,6 @@ const releaseAgent = {
   tools: [],
   updatedAt: "2026-07-16T10:00:00.000Z",
   userId: "",
-  version: 1,
 } satisfies Agent;
 
 const adminAgent = {
@@ -76,7 +75,6 @@ const adminAgent = {
 function chatUsage(): UsageSummary {
   return {
     agentId: releaseAgent.id,
-    agentVersion: releaseAgent.version,
     commitId: "commit-chat-success",
     completedAt: "2026-07-16T10:00:01.000Z",
     durationMs: 1000,
