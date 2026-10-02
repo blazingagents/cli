@@ -25,7 +25,6 @@ const agent = {
   tools: [],
   updatedAt: "2026-07-16T10:00:00.000Z",
   userId: "",
-  version: 1,
 } satisfies Agent;
 
 vi.mock("@ai-sdk/tui", () => ({
