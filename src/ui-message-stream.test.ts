@@ -1,5 +1,5 @@
 import type { BlazingAgentsUIMessageChunk } from "@blazingagents/sdk";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { decodeUIMessageResponse } from "./ui-message-stream.ts";
 
 function responseFromText(text: string): Response {
@@ -43,11 +43,13 @@ describe("decodeUIMessageResponse", () => {
     await expect(reader.read()).rejects.toBeDefined();
   });
 
-  it("allows the decoded stream to be canceled", async () => {
-    const response = new Response(new ReadableStream<Uint8Array>());
+  it("forwards cancellation to the response body with its reason", async () => {
+    const cancel = vi.fn();
+    const response = new Response(new ReadableStream<Uint8Array>({ cancel }));
 
     await expect(
       decodeUIMessageResponse(response).cancel("closed")
     ).resolves.toBeUndefined();
+    expect(cancel).toHaveBeenCalledExactlyOnceWith("closed");
   });
 });
