@@ -189,3 +189,14 @@ test.each([
     ).rejects.toThrow(message);
   }
 );
+
+test("a spending stop preserves its actionable message after an error finish", async () => {
+  const message =
+    "Agent spending limit reached. Check the allowance and next reset in settings.";
+  await expect(
+    consume([
+      { type: "error", errorText: message },
+      { type: "finish", finishReason: "error" },
+    ])
+  ).rejects.toThrow(message);
+});

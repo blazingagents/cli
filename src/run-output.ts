@@ -197,7 +197,7 @@ export async function consumeSessionStream({
       case "finish":
         finished = true;
         if (chunk.finishReason === "error") {
-          failure = "The Turn failed during generation.";
+          failure ??= "The Turn failed during generation.";
         }
         break;
       default:
